@@ -13,13 +13,14 @@ class Options(usage.Options):
     ]
 
 class RoboBelleService(Service):
-    def __init__(self, endpoint, channels, nick, realname, user, modules):
+    def __init__(self, endpoint, channels, nick, realname, user, modules, command_prefix):
         self._endpoint = endpoint
         self._channels = channels
         self._nick = nick
         self._realname = realname
         self._user = user
         self._modules = modules
+        self._command_prefix = command_prefix
 
     def startService(self):
         """Construct a client and connect to server"""
@@ -32,7 +33,13 @@ class RoboBelleService(Service):
             reactor.stop()
 
         client = clientFromString(reactor, self._endpoint)
-        factory = RobotFactory({"network" : self._endpoint, "channels": self._channels, "user": self._user, "nick": self._nick , "modules": self._modules, "realname": self._realname })
+        factory = RobotFactory({"network" : self._endpoint,
+                                "channels": self._channels,
+                                "user": self._user,
+                                "nick": self._nick,
+                                "modules": self._modules,
+                                "realname": self._realname,
+                                "command_prefix": self._command_prefix})
 
         return client.connect(factory).addCallbacks(connected,failure)
 
@@ -61,6 +68,7 @@ class RoboBelleServiceMaker(object):
             realname = config.get('irc', 'realname'),
             user = config.get('irc', 'user'),
             modules = modules,
+            command_prefix = config.get('belle', 'command_prefix')
         )
 
 
