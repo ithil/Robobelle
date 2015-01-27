@@ -4,31 +4,10 @@ from twisted.words.protocols import irc
 from base_module import BaseModule
 
 
-class RobotFactory(protocol.ClientFactory):
-    """ This class inherits IRC protocol stuff from Twisted and sets up the basics """
-    # Instantiate IRC protocol
-    protocol = RoboBelle
-    def __init__(self, settings):
-        settings["modules"] = [BaseModule]
-
-        for plugin in modules:
-            self.modules.append(plugin())
-
-
-        """ Initialize the bot factory with provided settings """
-        self.network = settings["network"]
-        self.channels = settings["channel"]
-        self.realname = settings["realname"]
-        self.user = settings["user"]
-        self.nick = settings["nick"]
-        self.modules = settings["modules"] # Contains all classes to load and initialize!
-        self.command_prefix = "!"
-
-
 class RoboBelle(irc.IRCClient):
     def connectionMade(self):
         """Called when a connection is made."""
-        self.nickname = self.factory.nickname
+        self.nickname = self.factory.nick
         self.realname = self.factory.realname
         irc.IRCClient.connectionMade(self)
         log.msg("Connection established")
@@ -43,16 +22,16 @@ class RoboBelle(irc.IRCClient):
     def signedOn(self):
         """Called when bot has successfully signed on to server."""
         log.msg("Logged in")
-        if self.nickname != self.factory.nickname:
+        if self.nickname != self.factory.nick:
             log.msg('Nickname was taken, actual nickname is now "{}"'.format(self.nickname))
 
-        for channel in self.channels:
+        for channel in self.factory.channels:
             self.join(channel)
 
 
     def joined(self, channel):
         """Called when the bot joins the channel."""
-        log.msg("[{nick} has joined {channel}]".format(nick=self.nick, channel=channel))
+        log.msg("[{nick} has joined {channel}]".format(nick=self.nickname, channel=channel))
 
 
     def privmsg(self, user, channel, msg):
@@ -73,3 +52,25 @@ class RoboBelle(irc.IRCClient):
                 reply = getattr(module, 'run_if_matches')()
                 if reply:
                     self.msg(reply_to, reply)
+
+class RobotFactory(protocol.ClientFactory):
+    """ This class inherits IRC protocol stuff from Twisted and sets up the basics """
+    # Instantiate IRC protocol
+    protocol = RoboBelle
+    def __init__(self, settings):
+
+        self.modules = []                   # Array containing modules
+        for plugin in settings["modules"]:  # Instantiate each module as a type
+            self.modules.append(type(plugin)())
+
+        for channel in settings["channels"]:
+            print("I HAVE CHANNEL: "+channel)
+
+        """ Initialize the bot factory with provided settings """
+        self.network = settings["network"]
+        self.channels = settings["channels"]
+        self.realname = settings["realname"]
+        self.user = settings["user"]
+        self.nick = settings["nick"]
+        self.modules = settings["modules"] # Contains all classes to load and initialize!
+        self.command_prefix = "!"
