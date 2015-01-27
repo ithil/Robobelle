@@ -3,7 +3,7 @@ from BaseModule import BaseModule
 class Democracy(BaseModule):
 
     matchers = {
-                "!poll", "create_poll", 
+                "!poll": "create_poll", 
                 "!vote" : "vote",
                 "!polls" : "last_polls",
                 "!answer" : "add_answer"

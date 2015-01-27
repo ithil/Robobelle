@@ -58,10 +58,11 @@ class RoboBelle(irc.IRCClient):
             for module in self.factory.loader.modules:
                 reply = getattr(module,'run_if_matches')(module,msg)
                 if reply:
-                    log.msg("Sending reply to {sender} ({mess})".format(sender=reply_to, mess=reply))
+                    log.msg("{match} matched a trigger in {cls} which returned: {reply}".format(match=msg, cls=module.__class__.__name__,reply=reply))
+                    log.msg("Sending reply to {}".format(reply_to))
                     self.msg(reply_to, reply)
                 else:
-                    log.msg("Reply came out as {}".format(reply))
+                    log.msg("{match} matched nothing in {cls}".format(match=msg, cls=module.__class__.__name__))
         # It should also be possible to do "passive" things, like logging
         # or learning from messages.
         else:
@@ -70,23 +71,3 @@ class RoboBelle(irc.IRCClient):
             for module in self.factory.loader.modules:
               if hasattr(module, 'raw'):
                 getattr(module,'raw')(msg)
-
-
-class RobotFactory(protocol.ClientFactory):
-    """ This class inherits IRC protocol stuff
-    from Twisted and sets up the basics """
-
-    # Instantiate IRC protocol
-    protocol = RoboBelle
-
-    def __init__(self, settings):
-        self.modules = []                   # Array containing modules
-
-        """ Initialize the bot factory with provided settings """
-        self.network = settings["network"]
-        self.channels = settings["channels"]
-        self.realname = settings["realname"]
-        self.user = settings["user"]
-        self.nick = settings["nick"]
-        self.command_prefix = settings["command_prefix"]
-        self.loader = copy.copy(ModuleLoader())
