@@ -8,9 +8,20 @@ class BaseModule(object):
 
 
     def run_if_matches(idk,obj,msg):
-        print("Running run_if_matches with msg {}".format(msg))
+        """
+            This function will be run on each object, and continues
+            to run the function on the object associated with its regex.
+            The regex matcher will be stripped from the message before
+            the message is passed to the objects function.
+        """
+
+        # Iterate through the objects regex matchers
         for regex, function in obj.matchers.items():
+
+            # If a match is found, and an function exists, run it and reply with
+            # returned message (unless message is false). 
             if re.compile(regex).match(msg):
+                msg = re.sub(regex, '', msg).strip()    # Strip Command from message
                 if not hasattr(obj, function):
                     raise Exception("{classname} does not have a function named {functionname}".format(classname=self.__class__.__name__, functionname=function))
                 else:
