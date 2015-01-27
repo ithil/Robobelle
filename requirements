@@ -3,3 +3,4 @@ twisted==14.0.2
 pyopenssl
 service_identity
 configparser
+wikipedia

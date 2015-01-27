@@ -40,6 +40,8 @@ class RoboBelle(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         """Called when the bot receives a message."""
 
+        # If a message starts with the command_prefix (usually !)
+        # then parse the command
         if msg.startswith(self.factory.command_prefix):
             sender = user.split('!', 1)[0]
             reply_to = ''
@@ -50,6 +52,9 @@ class RoboBelle(irc.IRCClient):
             else:
                 reply_to = channel
 
+            # Iterate through all loaded modules and call the BaseModule
+            # method 'run_if_matches' - if a module has any function
+            # associated to the provided command, then it will be executed
             for module in self.factory.loader.modules:
                 reply = getattr(module,'run_if_matches')(module,msg)
                 if reply:
@@ -57,6 +62,14 @@ class RoboBelle(irc.IRCClient):
                     self.msg(reply_to, reply)
                 else:
                     log.msg("Reply came out as {}".format(reply))
+        # It should also be possible to do "passive" things, like logging
+        # or learning from messages.
+        else:
+            # If any module has a method "raw", it will be run on ANY message
+            # but no reply can be sent
+            for module in self.factory.loader.modules:
+              if hasattr(module, 'raw'):
+                getattr(module,'raw')(msg)
 
 
 class RobotFactory(protocol.ClientFactory):
@@ -68,9 +81,6 @@ class RobotFactory(protocol.ClientFactory):
 
     def __init__(self, settings):
         self.modules = []                   # Array containing modules
-
-        for channel in settings["channels"]:
-            print("I HAVE CHANNEL: "+channel)
 
         """ Initialize the bot factory with provided settings """
         self.network = settings["network"]

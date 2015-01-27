@@ -1,0 +1,11 @@
+2015-01-27 11:02:53+0100 [-] Log opened.
+2015-01-27 11:02:53+0100 [-] twistd 14.0.2 (/usr/bin/python2 2.7.9) starting up.
+2015-01-27 11:02:53+0100 [-] reactor class: twisted.internet.epollreactor.EPollReactor.
+2015-01-27 11:02:53+0100 [-] /usr/lib/python2.7/site-packages/twisted/internet/_sslverify.py:184: exceptions.UserWarning: You do not have the service_identity module installed. Please install it from <https://pypi.python.org/pypi/service_identity>. Without the service_identity module and a recent enough pyOpenSSL tosupport it, Twisted can perform only rudimentary TLS client hostnameverification.  Many valid certificate/hostname mappings may be rejected.
+2015-01-27 11:02:53+0100 [-] I HAVE CHANNEL: #council
+2015-01-27 11:02:53+0100 [-] Loaded module ExampleModule
+2015-01-27 11:02:53+0100 [-] Loaded module SayHello
+2015-01-27 11:02:53+0100 [-] Starting factory <organs.main.RobotFactory instance at 0x7fe39a4160e0>
+2015-01-27 11:02:53+0100 [Uninitialized] Connection established
+2015-01-27 11:02:53+0100 [RoboBelle (TLSMemoryBIOProtocol),client] Logged in
+2015-01-27 11:02:53+0100 [RoboBelle (TLSMemoryBIOProtocol),client] [Belle has joined #council]

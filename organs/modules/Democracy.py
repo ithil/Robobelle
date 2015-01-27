@@ -1,8 +1,13 @@
 from BaseModule import BaseModule
 
-class ExampleModule(BaseModule):
+class Democracy(BaseModule):
 
-    matchers = {"!match_this" : "run_function"}
+    matchers = {
+                "!poll", "create_poll", 
+                "!vote" : "vote",
+                "!polls" : "last_polls",
+                "!answer" : "add_answer"
+                }
 
     def __init__(self, args):
         """
