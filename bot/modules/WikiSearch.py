@@ -5,7 +5,8 @@ from BaseModule import BaseModule
 
 class WikiSearch(BaseModule):
 
-    matchers = {"!wiki" : "lookup", "!w" : "lookup"}
+    matchers = [{"regex": "!wiki", "function" : "lookup", "description": "Searches wikipedia and returns a summary of first result"},
+                {"regex": "!w", "function": "lookup", "description": "Alias for !wiki"}]
 
     def __init__(self, args):
         """
@@ -14,7 +15,7 @@ class WikiSearch(BaseModule):
           These will be turned into regex-matchers that redirect to
           the provided function name
         """
-        super(self.__class__,self).__init__(self.matchers)
+        super(self.__class__,self).__init__(self)
 
     def lookup(discard,msg):
         """ Search Wikipedia and return summary of first article found """

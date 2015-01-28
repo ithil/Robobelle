@@ -1,11 +1,25 @@
 import re
-from twisted.python import log
+from bot.module_loader import ModuleLoader
+#from twisted.python import log
+
+class log:
+    msg = ""
 
 class BaseModule(object):
     matchers = dict({})
-    def __init__(self, new_matchers):
-        for regex, function in new_matchers.items():
-            self.matchers[regex] = function
+    events = dict({})
+
+    def __init__(self, module):
+        self.register_module(module)
+
+    def register_module(self, module):
+        loader = ModuleLoader()
+        if hasattr(module,'matchers'):
+            for matcher in module.matchers:
+                ModuleLoader.register_regex(loader, matcher["regex"], module, matcher["function"], matcher["description"])
+        if hasattr(module,'events'):
+            for event, action in module.events.items():
+                ModuleLoader.register_event(loader, event, module, action["function"], action["description"])
 
 
     def run_if_matches(self,obj,msg):

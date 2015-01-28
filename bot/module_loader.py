@@ -3,12 +3,75 @@ import os
 import sys
 import re
 import copy
-from twisted.python import log
+from singleton import Singleton
+
 
 class ModuleLoader(object):
-    modules = []    # Contains instances of each module
+    """
+    Loads all modules dropped into the modules/ folder, using baseclass
+    BaseModule. These are stored in modules, which is effectively static.
+
+    Can be accessed anywhere by ModuleLoader.modules
+    """
+    modules = dict({
+                    "regex": list(),
+                    "event": dict({
+                                    "kicked": list(),  # When a user is kicked
+                                    "joined": list(),  # When a user joined
+                                    "parted": list(),  # When a user parted
+                                    "topic": list(),    # When topic is changed
+                                    "quit": list(),     # When a user quits
+                                    "action": list(),   # When a user uses /me
+                                    "mode": list(),     # When the mode is changed
+                                    "renamed": list()   # When a user changed nick
+                        })
+                    })    # Contains instances of each module
+    __metaclass__ = Singleton
 
     def __init__(self):
+        ModuleLoader.modules
+        self.load_modules()
+
+    def register_regex(self, regex, module, function, description):
+        """
+        Registers a function to be run on a module when a message
+        matches the regex.
+
+        regex   --  Regex to match against
+        module  --  Object to run function on
+        function    --  Function to run
+        description --  Help message to output when !help command is received
+        """
+        ModuleLoader.modules["regex"].append(dict({"regex": regex, "module": module, "function": function, "description": description}))
+
+
+    def register_event(self, event, module, function, description):
+        """
+        Registers a function to be run on a module when a specific event occurs.
+
+        Existing events are:
+            - action [A user performs an action, i.e /me dances]
+            - kicked [A user is kicked]
+            - joined [A user has joined]
+            - mode   [Channel mode is changed]
+            - parted [A user has left the channel]
+            - quit   [A user has quit the network]
+            - renamed[A user changed nick]
+            - topic  [Channel topic is changed]
+
+        """
+        if event not in modules["event"].keys():
+            raise Exception("Attempt to register event {ev} for {mod} failed. Event not supported.".format(ev=event, mod=module.__class__.__name__))
+        else:
+            ModuleLoader.modules["event"][event].append(dict({"module": module, "function": function, "description": description}))
+
+
+    def load_modules(self):
+        """
+        Loads all modules and assigns them to indexes in ModuleLoader.modules
+
+        Returns dict of module categories
+        """
         path = os.path.join(os.path.dirname(__file__), "modules")
         modules = pkgutil.iter_modules(path=[path])
         sys.path.append(path)
@@ -20,13 +83,13 @@ class ModuleLoader(object):
                 loaded_mod = __import__(mod_name, fromlist=[mod_name])
 
                 # Load class from imported module
-                s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', mod_name)
-                file_name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+                #s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', mod_name)
+                #file_name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
                 loaded_class = getattr(loaded_mod, mod_name)
 
                 # Create an instance of the class
                 # except if it's the BaseModule class
                 if mod_name != "BaseModule":
                     instance = loaded_class(mod_name)
-                    self.modules.append(copy.copy(instance))
-                    log.msg("Loaded module {}".format(mod_name))
+                    #ModuleLoader.modules.append(copy.copy(instance))
+                    #log.msg("Loaded module {}".format(mod_name))

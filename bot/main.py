@@ -1,4 +1,5 @@
 import copy
+import re
 
 from twisted.internet import protocol
 from twisted.python import log
@@ -47,22 +48,21 @@ class RoboBelle(irc.IRCClient):
             reply_to = ''
 
             # If it's a PM
-            if channel == self.nickname:
-                reply_to = sender
-            else:
-                reply_to = channel
+            reply_to = sender if channel == self.nickname else channel
 
             # Iterate through all loaded modules and call the BaseModule
             # method 'run_if_matches' - if a module has any function
             # associated to the provided command, then it will be executed
-            for module in self.factory.loader.modules:
-                reply = getattr(module,'run_if_matches')(module,msg)
-                if reply:
-                    log.msg("{match} matched a trigger in {cls} which returned: {reply}".format(match=msg, cls=module.__class__.__name__,reply=reply))
-                    log.msg("Sending reply to {}".format(reply_to))
-                    self.msg(reply_to, reply)
-                else:
-                    log.msg("{match} matched nothing in {cls}".format(match=msg, cls=module.__class__.__name__))
+            for module in self.factory.loader.modules["regex"]:
+                if re.compile(module["regex"]).match(msg):
+                    reply = getattr(module["module"],module["function"])(msg)
+                    if reply:
+                        log.msg("{match} matched a trigger in {cls} which returned: {reply}".format(match=msg, cls=module["module"].__class__.__name__,reply=reply))
+                        log.msg("Sending reply to {}".format(reply_to))
+                        self.msg(reply_to, reply)
+                    else:
+                        log.msg("{match} matched nothing in {cls}".format(match=msg, cls=module["module"].__class__.__name__))
+
         # It should also be possible to do "passive" things, like logging
         # or learning from messages.
         else:
