@@ -60,7 +60,7 @@ class ModuleLoader(object):
             - topic  [Channel topic is changed]
 
         """
-        if event not in modules["event"].keys():
+        if event not in module.events.keys():
             raise Exception("Attempt to register event {ev} for {mod} failed. Event not supported.".format(ev=event, mod=module.__class__.__name__))
         else:
             ModuleLoader.modules["event"][event].append(dict({"module": module, "function": function, "description": description}))

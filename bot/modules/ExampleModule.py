@@ -5,8 +5,8 @@ class ExampleModule(BaseModule):
     matchers = [{"regex": "!match_this", "function": "run_function",
                  "description": "When !match_this matches the message, run_function()"}
                 ]
-    events = dict("joined": dict{"function": "do_this_on_user_join",
-                                 "description": "Perform action on event"})
+    events = {"joined": {"function": "do_this_on_user_join",
+                                 "description": "Perform action on event"}}
 
     def __init__(self, args):
         """
