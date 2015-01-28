@@ -71,3 +71,4 @@ class RoboBelle(irc.IRCClient):
             for module in self.factory.loader.modules:
               if hasattr(module, 'raw'):
                 getattr(module,'raw')(msg)
+    
