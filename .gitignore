@@ -1,2 +1,7 @@
-*.pyc
+!*.gitignore
+!*.py
+!*.ini
+!*.md
+!requirements
+!**/
 __pycache__/*
