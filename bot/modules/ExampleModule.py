@@ -14,17 +14,17 @@ class ExampleModule(BaseModule):
         """
         super(self.__class__,self).__init__(self)
 
-    def run_function(discard,msg):
+    def run_function(self,msg):
         """
         Function that will be run when command !match_this is provided.
         This docstring becomes the help message when !help is run.
         """
         return msg
 
-    def do_this_on_user_join(self):
+    def do_this_on_user_join(self, event):
       """This function will be run when the 'joined' event hook is triggered"""
       return None
 
-    def raw(discard, msg):
+    def raw(self, msg):
         """ Function that will always be run, on any message. No reply can be sent"""
         print("Received message {}".format(msg))

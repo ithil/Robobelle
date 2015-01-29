@@ -9,11 +9,12 @@ class Trigger(object):
     reply_handle = None # Contains the object to user for replying to the message
 
     def __init__(self, contents, author, channel, reply_handle):
-        self.contents = contents.strip()
+        self.contents = contents
         self.author = author
         self.channel = channel
         self.reply_handle = reply_handle
-
+        if self.contents:
+          self.contents = self.contents.strip()
 
 
     def reply(self, message):
