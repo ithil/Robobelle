@@ -1,9 +1,7 @@
 import re
 from bot.module_loader import ModuleLoader
-#from twisted.python import log
+from twisted.python import log
 
-class log:
-    msg = ""
 
 class BaseModule(object):
     matchers = dict({})

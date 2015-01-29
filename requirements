@@ -4,3 +4,4 @@ pyopenssl
 service_identity
 configparser
 wikipedia
+nltk

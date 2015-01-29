@@ -1,3 +1,5 @@
+from module_loader import ModuleLoader
+from twisted.python import log
 
 class Trigger(object):
     contents = ""       # Contains the contents
@@ -12,7 +14,7 @@ class Trigger(object):
         self.channel = channel
         self.reply_handle = reply_handle
 
-    def dispatch(self, is_event=False):
+
 
     def reply(self, message):
         """
@@ -21,4 +23,9 @@ class Trigger(object):
 
         message --  String to reply with
         """
-        reply_handle.msg(author, message) if channel == author else reply_handle.msg(channel, message)
+        if self.channel == self.author:
+            self.reply_handle.msg(self.author, message)
+            log.msg("Sending reply to {}".format(self.author))
+        else:
+            self.reply_handle.msg(self.channel, message)
+            log.msg("Sending reply to {}".format(self.channel))

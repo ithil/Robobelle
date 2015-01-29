@@ -1,11 +1,12 @@
 import copy
-import re
 
 from twisted.internet import protocol
 from twisted.python import log
 from twisted.words.protocols import irc
 
 from module_loader import ModuleLoader
+from event import Event
+from message import Message
 
 class RoboBelle(irc.IRCClient):
     mods = []
@@ -38,6 +39,54 @@ class RoboBelle(irc.IRCClient):
         log.msg("[{nick} has joined {channel}]".format(nick=self.nickname,
                                                        channel=channel))
 
+    #
+    # Existing events are:
+    #     - action [A user performs an action, i.e /me dances]
+    #     - kicked [A user is kicked]
+    #     - joined [A user has joined]
+    #     - mode   [Channel mode is changed]
+    #     - parted [A user has left the channel]
+    #     - quit   [A user has quit the network]
+    #     - renamed[A user changed nick]
+    #     - topic  [Channel topic is changed]
+
+    # Action Event(contents, source, target, channel, reply_handle)
+    def action(self, user, channel, emote):
+        ev = Event('action',emote, user, None, channel, self)
+        ev.dispatch()
+    # Kicked
+    def userKicked(self, kickee, channel, kicker, message):
+        ev = Event('kick', message, kicker, kickee, channel, self)
+        ev.dispatch()
+    # Joined
+    def userJoined(self, user, channel):
+        ev = Event('joined', None, user, channel, channel, self)
+        ev.dispatch()
+    # Mode
+    #def modeChanged(self, user, channel, set, modes, args):
+    #    with Event('mode', modes, user, channel, channel, self) as response:
+    #        response.dispatch()
+    # Parted
+    def userLeft(self, user, channel):
+        ev = Event('parted', None, user, channel, channel, self)
+        ev.dispatch()
+    # Quit
+    def userQuit(self, user, quitMessage):
+        ev = Event('quit', quitMessage, user, None, None, self)
+        ev.dispatch()
+    # Renamed
+    def userRenamed(self, oldname, newname):
+        ev = Event('nick', None, oldname, newname, None, self)
+        ev.dispatch()
+    # Topic
+    def topicUpdated(self, user, channel, newTopic):
+        ev = Event('topic', newTopic, user, channel, channel, self)
+        ev.dispatch()
+
+
+
+
+
     def privmsg(self, user, channel, msg):
         """Called when the bot receives a message."""
 
@@ -50,25 +99,17 @@ class RoboBelle(irc.IRCClient):
             # If it's a PM
             reply_to = sender if channel == self.nickname else channel
 
-            # Iterate through all loaded modules and call the BaseModule
-            # method 'run_if_matches' - if a module has any function
-            # associated to the provided command, then it will be executed
-            for module in self.factory.loader.modules["regex"]:
-                if re.compile(module["regex"]).match(msg):
-                    reply = getattr(module["module"],module["function"])(msg)
-                    if reply:
-                        log.msg("{match} matched a trigger in {cls} which returned: {reply}".format(match=msg, cls=module["module"].__class__.__name__,reply=reply))
-                        log.msg("Sending reply to {}".format(reply_to))
-                        self.msg(reply_to, reply)
-                    else:
-                        log.msg("{match} matched nothing in {cls}".format(match=msg, cls=module["module"].__class__.__name__))
+            # Create an important Message object. It will dispatch the
+            # wanted functions in each module.
+            m = Message(msg, reply_to, channel, self)
+            m.dispatch()
+
 
         # It should also be possible to do "passive" things, like logging
         # or learning from messages.
         else:
             # If any module has a method "raw", it will be run on ANY message
             # but no reply can be sent
-            for module in self.factory.loader.modules:
-              if hasattr(module, 'raw'):
-                getattr(module,'raw')(msg)
-    
+            for module in self.factory.loader.modules["regex"]:
+              if hasattr(module["module"], 'raw'):
+                getattr(module["module"],'raw')(msg)

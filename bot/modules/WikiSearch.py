@@ -6,7 +6,7 @@ from BaseModule import BaseModule
 class WikiSearch(BaseModule):
 
     matchers = [{"regex": "!wiki", "function" : "lookup", "description": "Searches wikipedia and returns a summary of first result"},
-                {"regex": "!w", "function": "lookup", "description": "Alias for !wiki"}]
+                {"regex": "!w\s", "function": "lookup", "description": "Alias for !wiki"}]
 
     def __init__(self, args):
         """
@@ -17,20 +17,24 @@ class WikiSearch(BaseModule):
         """
         super(self.__class__,self).__init__(self)
 
-    def lookup(discard,msg):
+    def lookup(self, msg):
         """ Search Wikipedia and return summary of first article found """
-        search_results = wikipedia.search(msg)
+        search_results = wikipedia.search(msg.contents)
         if not search_results:
+          print(search_results)
           return "I couldn't find anything, I'm sorry! :("
         else:
           page = wikipedia.page(search_results[0])
           summary = page.summary.encode('utf-8')
           title = page.title.encode('utf-8')
-          summary = (summary[:348] + '...') if len(summary) > 400 else summary
+          read_more = " \x02// Read more: \x02" + page.url.encode('utf-8')
+          amount_lines = 2 * 348
+
+          summary = (summary[:amount_lines-len(read_more)] + '...') if len(summary) > 348 else summary
 
           # Make the title bold if found in the summary
           summary = re.sub(title, '\x02'+title+'\x02', summary)
 
-          summarized_page = summary + " \x02// Read more: \x02" + page.url.encode('utf-8')
+          summarized_page = summary + read_more
 
-          return summarized_page
+          msg.reply(summarized_page)

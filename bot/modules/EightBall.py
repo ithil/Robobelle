@@ -3,7 +3,7 @@ import random
 
 class EightBall(BaseModule):
 
-    matchers = [dict({"regex": "^!8ball",
+    matchers = [dict({"regex": "!8ball\s",
                      "function": "eightball",
                      "description": "Picks a random 8ball reply"
                      })]

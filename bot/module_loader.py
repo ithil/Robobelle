@@ -23,7 +23,7 @@ class ModuleLoader(object):
                                     "quit": list(),     # When a user quits
                                     "action": list(),   # When a user uses /me
                                     "mode": list(),     # When the mode is changed
-                                    "renamed": list()   # When a user changed nick
+                                    "nick": list()   # When a user changed nick
                         })
                     })    # Contains instances of each module
     __metaclass__ = Singleton
