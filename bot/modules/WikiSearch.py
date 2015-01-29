@@ -5,8 +5,7 @@ from BaseModule import BaseModule
 
 class WikiSearch(BaseModule):
 
-    matchers = [{"regex": "!wiki", "function" : "lookup", "description": "Searches wikipedia and returns a summary of first result"},
-                {"regex": "!w\s", "function": "lookup", "description": "Alias for !wiki"}]
+    matchers = {"!wiki": "lookup", "!w\s": "lookup"}
 
     def __init__(self, args):
         """
@@ -18,7 +17,7 @@ class WikiSearch(BaseModule):
         super(self.__class__,self).__init__(self)
 
     def lookup(self, msg):
-        """ Search Wikipedia and return summary of first article found """
+        """ Searches wikipedia and returns a summary of the first result """
         search_results = wikipedia.search(msg.contents)
         if not search_results:
           print(search_results)

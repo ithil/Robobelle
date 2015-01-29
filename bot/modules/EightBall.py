@@ -3,11 +3,7 @@ import random
 
 class EightBall(BaseModule):
 
-    matchers = [dict({"regex": "!8ball\s",
-                     "function": "eightball",
-                     "description": "Picks a random 8ball reply"
-                     })]
-    events = {}
+    matchers = {"!8ball\s": "eightball"}
 
     answers = ["It is certain",
                "It is decidedly so",
@@ -40,5 +36,5 @@ class EightBall(BaseModule):
         super(self.__class__,self).__init__(self)
 
     def eightball(discard,msg):
-        """ Pick a random element from the EightBall.answers array """
+        """ Picks a random 8ball reply """
         return random.choice(discard.answers)

@@ -5,9 +5,7 @@ from twisted.python import log
 
 class RhymesWith(BaseModule):
 
-    matchers = [{"regex": "!rhyme", "function": "rhyme",
-                 "description": "Returns a random word that rhymes with a given word"}
-                ]
+    matchers = {"!rhyme": "rhyme"}
 
     def __init__(self, args):
         """
@@ -19,7 +17,7 @@ class RhymesWith(BaseModule):
         super(self.__class__,self).__init__(self)
 
     def rhyme(self,msg):
-        """ Gives a random word that rhymes with msg.contents """
+        """ Returns a random word that rhymes with a given word """
         log.msg("Trying to find a word that rhymes with {}".format(msg.clean_contents))
         entries = nltk.corpus.cmudict.entries()
         syllables = [(word, syl) for word, syl in entries if word == msg.clean_contents]

@@ -12,9 +12,9 @@ class BaseModule(object):
 
     def register_module(self, module):
         loader = ModuleLoader()
-        if hasattr(module,'matchers'):
-            for matcher in module.matchers:
-                ModuleLoader.register_regex(loader, matcher["regex"], module, matcher["function"], matcher["description"])
-        if hasattr(module,'events'):
+        if hasattr(module,'matchers') and len(module.matchers):
+            for regex,function in module.matchers.items():
+                ModuleLoader.register_regex(loader, regex, module, function, getattr(module, function).__doc__)
+        if hasattr(module,'events') and len(module.events):
             for event, action in module.events.items():
-                ModuleLoader.register_event(loader, event, module, action["function"], action["description"])
+                ModuleLoader.register_event(loader, event, module, action, getattr(module, function).__doc__)

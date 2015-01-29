@@ -4,9 +4,7 @@ import re
 
 class Help(BaseModule):
 
-    matchers = [{"regex": "!help", "function": "help_message",
-                 "description": "Prints this message"}
-                ]
+    matchers = {"!help": "help_message"}
 
     def __init__(self, args):
         """
@@ -19,8 +17,7 @@ class Help(BaseModule):
 
     def help_message(self,msg):
         """
-        Iterates through all modules and compiles a
-        list of commands and descriptions
+        Prints a help message generated from docstrings from loaded modules
         """
         help = [(mod["regex"], mod["description"]) for mod in ModuleLoader.modules["regex"]]
         help = sorted(help, key=lambda command: command[0])

@@ -2,11 +2,8 @@ from BaseModule import BaseModule
 
 class ExampleModule(BaseModule):
 
-    matchers = [{"regex": "!match_this", "function": "run_function",
-                 "description": "When !match_this matches the message, run_function()"}
-                ]
-    events = {"joined": {"function": "do_this_on_user_join",
-                                 "description": "Perform action on event"}}
+    matchers = {"!match_this": "run_function"}
+    events = { "joined": "do_this_on_user_join" }
 
     def __init__(self, args):
         """
@@ -18,8 +15,15 @@ class ExampleModule(BaseModule):
         super(self.__class__,self).__init__(self)
 
     def run_function(discard,msg):
-        """ Function that will be run when command !match_this is provided"""
+        """
+        Function that will be run when command !match_this is provided.
+        This docstring becomes the help message when !help is run.
+        """
         return msg
+
+    def do_this_on_user_join(self):
+      """This function will be run when the 'joined' event hook is triggered"""
+      return None
 
     def raw(discard, msg):
         """ Function that will always be run, on any message. No reply can be sent"""
