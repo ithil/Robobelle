@@ -97,7 +97,7 @@ class RoboBelle(irc.IRCClient):
             reply_to = ''
 
             # If it's a PM
-            reply_to = sender if channel == self.nickname else channel
+            reply_to = sender
 
             # Create an important Message object. It will dispatch the
             # wanted functions in each module.
