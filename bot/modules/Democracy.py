@@ -14,7 +14,7 @@ class Democracy(BaseModule):
         super(self.__class__,self).__init__(self)
 
     def create_poll(self, msg):
-      """Creates a new poll (!poll title;answer1;answer2)"""
+      """Creates a new poll (either !poll title;answer1;answer2, or !poll title followed by !answer First option)"""
       return None
 
     def last_polls(self, msg):
