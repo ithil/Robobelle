@@ -30,3 +30,14 @@ class Trigger(object):
         else:
             self.reply_handle.msg(self.channel, message)
             log.msg("Sending reply to {}".format(self.channel))
+
+    def notice(self, message):
+      """
+      Sends a reply via NOTICE
+      """
+      if self.channel == self.author:
+          self.reply_handle.notice(self.author, message)
+          log.msg("Sending reply to {}".format(self.author))
+      else:
+          self.reply_handle.notice(self.channel, message)
+          log.msg("Sending reply to {}".format(self.channel))
