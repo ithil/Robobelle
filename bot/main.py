@@ -90,17 +90,16 @@ class RoboBelle(irc.IRCClient):
     def privmsg(self, user, channel, msg):
       """Called when the bot receives a message."""
       sender = user.split('!', 1)[0]
-      if sender is self.factory.nick:
+      if sender is self.factory.nick and sender is not "Rheya":
         return None
+      reply_to = ''
+
+      # If it's a PM
+      reply_to = sender
+
       # If a message starts with the command_prefix (usually !)
       # then parse the command
       if msg.startswith(self.factory.command_prefix):
-
-          reply_to = ''
-
-          # If it's a PM
-          reply_to = sender
-
           # Create an important Message object. It will dispatch the
           # wanted functions in each module.
           m = Message(msg, reply_to, channel, self)
@@ -111,7 +110,10 @@ class RoboBelle(irc.IRCClient):
         # or learning from messages.
       else:
         # If any module has a method "raw", it will be run on ANY message
-        # but no reply can be sent
-        for module in self.factory.loader.modules["regex"]:
+        # and replies can be sent via reply_handler (self)
+        for module in self.factory.loader.modules["raw"]:
           if hasattr(module["module"], 'raw'):
-            getattr(module["module"],'raw')(msg)
+            print("Module {} registered for 'raw' message processing ".format(module["module"].__class__.__name__))
+            getattr(module["module"],'raw')(msg, channel, self)
+          else:
+            print("Could not find method 'raw' in module "+module["module"].__class__.__name__)

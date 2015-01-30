@@ -13,6 +13,7 @@ class ModuleLoader(object):
 
     Can be accessed anywhere by ModuleLoader.modules
     """
+    # Contains instances of each module
     modules = dict({
                     "regex": list(),
                     "event": dict({
@@ -24,8 +25,9 @@ class ModuleLoader(object):
                                     "action": list(),   # When a user uses /me
                                     "mode": list(),     # When the mode is changed
                                     "nick": list()   # When a user changed nick
-                        })
-                    })    # Contains instances of each module
+                        }),
+                      "raw": list()
+                    })
     __metaclass__ = Singleton
 
     def __init__(self):
@@ -65,6 +67,12 @@ class ModuleLoader(object):
         else:
             ModuleLoader.modules["event"][event].append(dict({"module": module, "function": function, "description": description}))
 
+    def register_raw(self, module, description):
+      """
+      Registers modules with a function that should be run on *every*
+      message (like checking for URLs, or markov learning)
+      """
+      ModuleLoader.modules["raw"].append(dict({"module": module, "description": description}))
 
     def load_modules(self):
         """

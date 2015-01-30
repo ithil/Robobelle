@@ -25,5 +25,10 @@ class Message(Trigger):
                 log.msg("{match} matched a trigger in {cls} which returned: {reply}".format(match=self.contents, cls=module["module"].__class__.__name__,reply=reply))
 
     def strip_command(self, raw):
-      command = self.reply_handle.factory.command_prefix+"\w+\s*"
-      self.clean_contents = re.sub(command, "", self.contents)
+      #command = self.reply_handle.factory.command_prefix+"\w+\s*"
+      #self.clean_contents = re.sub(command, "", self.contents)
+      split_message = raw.split()
+
+      # Discard first word (command)
+      split_message.pop(0)
+      self.clean_contents = " ".join(split_message)

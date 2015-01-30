@@ -2,6 +2,7 @@ from BaseModule import BaseModule
 from bot.module_loader import ModuleLoader
 from bot.modules.ExampleModule import ExampleModule
 import re
+from time import sleep
 
 class Help(BaseModule):
 
@@ -24,6 +25,7 @@ class Help(BaseModule):
         help = [(mod["regex"], mod["description"]) for mod in ModuleLoader.modules["regex"]]
         help = sorted(help, key=lambda command: command[0])
 
+        count = 0
         msg.notice("I know the following commands: ")
         for h in help:
           if h[0] in ExampleModule.matchers.keys():
@@ -31,6 +33,12 @@ class Help(BaseModule):
           # Remove regex notation (\s*+, \w*+, \b+*)
           cmd = re.sub(r'((\\w\**\+*)|(\\s\+*\**)|\^|\\b\**\+*)', '', h[0])
           cmd = re.sub(r'(\\d)','<number>', cmd)
+          print("\t" + cmd + "\t-\t" + h[1].strip())
+          count += 1
+
+          # Avoid flood limit
+          if count == 9:
+            sleep(4)
           msg.notice("\t" + cmd + "\t-\t" + h[1].strip())
 
         #msg.notice(help_message)
