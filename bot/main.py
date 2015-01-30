@@ -88,28 +88,30 @@ class RoboBelle(irc.IRCClient):
 
 
     def privmsg(self, user, channel, msg):
-        """Called when the bot receives a message."""
+      """Called when the bot receives a message."""
+      sender = user.split('!', 1)[0]
+      if sender is self.factory.nick:
+        return None
+      # If a message starts with the command_prefix (usually !)
+      # then parse the command
+      if msg.startswith(self.factory.command_prefix):
 
-        # If a message starts with the command_prefix (usually !)
-        # then parse the command
-        if msg.startswith(self.factory.command_prefix):
-            sender = user.split('!', 1)[0]
-            reply_to = ''
+          reply_to = ''
 
-            # If it's a PM
-            reply_to = sender
+          # If it's a PM
+          reply_to = sender
 
-            # Create an important Message object. It will dispatch the
-            # wanted functions in each module.
-            m = Message(msg, reply_to, channel, self)
-            m.dispatch()
+          # Create an important Message object. It will dispatch the
+          # wanted functions in each module.
+          m = Message(msg, reply_to, channel, self)
+          m.dispatch()
 
 
         # It should also be possible to do "passive" things, like logging
         # or learning from messages.
-        else:
-            # If any module has a method "raw", it will be run on ANY message
-            # but no reply can be sent
-            for module in self.factory.loader.modules["regex"]:
-              if hasattr(module["module"], 'raw'):
-                getattr(module["module"],'raw')(msg)
+      else:
+        # If any module has a method "raw", it will be run on ANY message
+        # but no reply can be sent
+        for module in self.factory.loader.modules["regex"]:
+          if hasattr(module["module"], 'raw'):
+            getattr(module["module"],'raw')(msg)

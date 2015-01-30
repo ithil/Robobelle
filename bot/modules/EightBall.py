@@ -37,4 +37,4 @@ class EightBall(BaseModule):
 
     def eightball(discard,msg):
         """ Picks a random 8ball reply """
-        return random.choice(discard.answers)
+        msg.reply(random.choice(discard.answers))

@@ -6,6 +6,7 @@ import re
 class Help(BaseModule):
 
     matchers = {"!help": "help_message"}
+    event = {"join": "say_hi"}
 
     def __init__(self, args):
         """
