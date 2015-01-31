@@ -106,7 +106,7 @@ class User(BaseModule):
       Updates timestamp for when a user last joined or parted a channel
       """
       cursor = self.db.cursor()
-      cursor.execute("SELECT * FROM user WHERE user = ?",(message.clean_contents.lower(),))
+      cursor.execute("SELECT * FROM user WHERE user = ?",(message.clean_contents.split().lower(),))
       results = cursor.fetchone()
       if results:
         message.reply("I last saw {user} {time}".format(user=message.author,time=self.how_long_ago(results["timestamp"])))

@@ -13,7 +13,7 @@ class Message(Trigger):
 
     def __init__(self, contents, author, channel, reply_handle):
         super(self.__class__,self).__init__(contents, author, channel, reply_handle)
-        clean_contents = self.strip_command(contents)
+        self.clean_contents = self.strip_command(contents)
 
     def dispatch(self):
         # Iterate through all loaded modules and call the BaseModule
@@ -31,4 +31,5 @@ class Message(Trigger):
 
       # Discard first word (command)
       split_message.pop(0)
+
       self.clean_contents = " ".join(split_message)

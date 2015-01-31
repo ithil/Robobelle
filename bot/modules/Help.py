@@ -39,6 +39,6 @@ class Help(BaseModule):
           # Avoid flood limit
           if count == 9:
             sleep(4)
-          msg.notice("\t" + cmd + "\t-\t" + h[1].strip())
+          msg.reply("\t" + cmd + "\t-\t" + h[1].strip())
 
         #msg.notice(help_message)
