@@ -1,5 +1,6 @@
 from datetime import datetime
 import sqlite3 as sql
+import re
 
 from BaseModule import BaseModule
 
@@ -8,7 +9,7 @@ from BaseModule import BaseModule
 class User(BaseModule):
 
     matchers = {"!seen": "last_seen", "!greet": "force_greet_user", "!addgreeting": "add_greeting", "!dropgreeting": "remove_greeting"}
-    events = { "joined": "update_last_seen_and_greet", "parted": "update_last_seen" }
+    events = { "joined": "update_last_seen_and_greet", "parted": "update_last_seen_and_greet" }
     db = sql.connect('bot/modules/databases/user')
     db.row_factory = sql.Row
 
@@ -26,32 +27,34 @@ class User(BaseModule):
     def force_greet_user(self, msg):
       """ Force me to say hi to someone """
       if self.first_seen(msg.clean_contents):
-        msg.reply(self.get_greeting('new'))
+        msg.reply(self.get_greeting('new', msg.channel))
       else:
-        greeting = self.get_greeting(msg.clean_contents)
+        greeting = self.get_greeting(msg.clean_contents, msg.channel)
         if greeting:
           msg.reply(greeting)
 
     def greet_user(self, event):
       if self.first_seen(event.author):
-        msg.reply(self.get_greeting('new'))
+        event.reply(self.get_greeting('new', event.channel))
       else:
-        greeting = self.get_greeting(event.author)
+        greeting = self.get_greeting(event.author, event.channel)
         if greeting:
-          msg.reply(greeting)
+          event.reply(greeting)
 
-    def get_greeting(self, username):
-      """ Retrieves greeting for a user (or generic if none found) """
+    def get_greeting(self, user, channel):
+      """ Retrieves greeting for a user """
       cursor = self.db.cursor()
-      cursor.execute('SELECT message FROM greeting WHERE user = ? AND channel = ? ORDER BY RANDOM() LIMIT 1',(username,))
+      cursor.execute('SELECT message FROM greeting WHERE user = ? AND channel = ? ORDER BY RANDOM() LIMIT 1',(user,channel))
       user_greeting = cursor.fetchone()
       if user_greeting:
-        return user_greeting["message"]
+        message = user_greeting["message"].encode('utf-8')
+        message = re.sub("USER", user, message)
+        return message
       else:
         return None
 
     def add_greeting(self, msg):
-      """ Add a new greeting. Arguments are: user message """
+      """ Add a new greeting. I'll replace USER with username in the message. Arguments are: user message """
       split_message = msg.clean_contents.split()
       user = split_message.pop(0)
       greeting = " ".join(split_message)
@@ -63,8 +66,11 @@ class User(BaseModule):
       last_id = cursor.fetchone()
       last_id = last_id["id"]
 
+      if user is "new":
+        user = "a new face around here"
+
       if last_id:
-        msg.reply("Hey, {sender}, I'll remember this the next time I see {user} (#{id})".format(sender=msg.author,user=user, id=id))
+        msg.reply("Hey, {sender}, I'll remember this the next time I see {user} (#{id})".format(sender=msg.author,user=user, id=last_id))
       else:
         msg.reply("Oops, crap, I already forgot what you said ...")
 
@@ -106,10 +112,15 @@ class User(BaseModule):
       Updates timestamp for when a user last joined or parted a channel
       """
       cursor = self.db.cursor()
-      cursor.execute("SELECT * FROM user WHERE user = ?",(message.clean_contents.split().lower(),))
+
+      cursor.execute("SELECT * FROM user WHERE user = ?",(message.clean_contents.lower(),))
+      print("Query: "+"SELECT * FROM user WHERE user = "+message.clean_contents.lower())
+      cursor.execute("SELECT * FROM user WHERE user = ?",(message.clean_contents.lower(),))
       results = cursor.fetchone()
       if results:
-        message.reply("I last saw {user} {time}".format(user=message.author,time=self.how_long_ago(results["timestamp"])))
+        message.reply("{user} was last seen {time}".format(user=results["user"],time=self.how_long_ago(results["timestamp"])))
+      else:
+        print(results)
       return message
 
 
@@ -118,9 +129,12 @@ class User(BaseModule):
       Updates last seen time for a user when (s)he joined or parted
       """
       cursor = self.db.cursor()
-      cursor.execute("INSERT OR REPLACE INTO user (user,first_seen) VALUES(?,(SELECT first_seen FROM user WHERE user = ? LIMIT 1))", (event.author.lower(),event.author.lower()))
+      cursor.execute("INSERT OR REPLACE INTO user (user, first_seen, timestamp) VALUES(?, coalesce((SELECT first_seen FROM user WHERE user = ? AND first_seen IS NOT NULL),CURRENT_TIMESTAMP), CURRENT_TIMESTAMP)", (event.author.lower(),event.author.lower()))
       self.db.commit()
-      self.greet_user(event)
+      if event.contents == "joined":
+        self.greet_user(event)
+      else:
+        print(event.contents)
       return None
 
     def how_long_ago(self, date):
@@ -169,6 +183,6 @@ class User(BaseModule):
 
     def initialize_database(self):
       cursor = self.db.cursor()
-      cursor.execute('CREATE TABLE IF NOT EXISTS "user" ("user" TEXT PRIMARY KEY NOT NULL, "first_seen" INTEGER NOT NULL DEFAULT (CURRENT_TIMESTAMP), "timestamp" INTEGER NOT NULL DEFAULT (CURRENT_TIMESTAMP));')
+      cursor.execute('CREATE TABLE IF NOT EXISTS "user" ("user" TEXT PRIMARY KEY NOT NULL, "first_seen" INTEGER NOT NULL DEFAULT (date("now", "localtime")), "timestamp" INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP);')
       cursor.execute('CREATE TABLE IF NOT EXISTS "greeting" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "user" TEXT NOT NULL, "message" TEXT NOT NULL, "channel" TEXT NOT NULL);')
       self.db.commit()

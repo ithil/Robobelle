@@ -32,4 +32,5 @@ class Message(Trigger):
       # Discard first word (command)
       split_message.pop(0)
 
-      self.clean_contents = " ".join(split_message)
+      clean_contents = " ".join(split_message)
+      return clean_contents

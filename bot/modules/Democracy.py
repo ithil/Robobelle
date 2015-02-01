@@ -8,7 +8,9 @@ class Democracy(BaseModule):
                 "^!newpoll\s+\w+.*": "create_poll",
                 "^!vote\s+\d": "vote",
                 "^!polls": "last_polls",
-                "^!ballot": "add_option"}
+                "^!ballot": "add_option",
+                "^!option": "add_option",
+                "^!answer": "add_option"}
 
     db = sql.connect('bot/modules/databases/democracynew')
     db.row_factory = sql.Row
@@ -31,6 +33,9 @@ class Democracy(BaseModule):
       if ";" in msg.clean_contents:
         poll_and_options = msg.clean_contents.split(";")
         cursor.execute("INSERT INTO poll(title, user) VALUES (?, ?)", (poll_and_options.pop(0), msg.author))
+
+        # Commit this transaction, or else all options will be linked to the previous poll
+        self.db.commit()
 
         options = []
 
@@ -58,8 +63,10 @@ class Democracy(BaseModule):
       cursor = self.db.cursor()
 
       cursor.execute("SELECT DISTINCT id, title FROM results ORDER BY date DESC LIMIT 5")
-      for row in cursor:
-        msg.reply(row["id"] + ": "+row["title"])
+
+      results = cursor.fetchall()
+      for row in results:
+        msg.reply(str(row["id"]) + ": "+row["title"].encode('utf-8'))
       return None
 
     def vote(self, msg):
@@ -75,11 +82,13 @@ class Democracy(BaseModule):
           cursor.execute("SELECT count(*) FROM vote WHERE user=? AND poll_id=?", (msg.author, self.current_poll))
           has_voted = cursor.fetchone()
 
-          if has_voted:
+          if not has_voted:
             cursor.execute("INSERT INTO vote (poll_id, option_id, user) VALUES (?,(SELECT id FROM option WHERE poll_id=? AND list_order=?),?)", (self.current_poll, self.current_poll, option_number, msg.author))
+            msg.reply(msg.author+" voted for option #"+option_number)
           else:
-            # Revote is vote was already cast
+            # Revote if vote was already cast
             cursor.execute("UPDATE vote SET option_id = (SELECT id FROM option WHERE list_order=? AND poll_id=?) WHERE poll_id=? AND user=?", (option_number, self.current_poll, self.current_poll, msg.author))
+            msg.reply(msg.author+" can't decide and changed their vote to option #"+option_number)
           self.db.commit()
         except Exception, e:
           print(e)
@@ -111,8 +120,12 @@ class Democracy(BaseModule):
         # Set the current poll_id
         self.current_poll = results[0]["id"]
 
-        for row in results:
-          response += "\n" + str(row["list_order"]) + ". " + row["description"] + " \x02| Votes: " + str(row["nVotes"]) + "\x02"
+        # If no options exists, just continue
+        if len(results)>1:
+          for row in results:
+            response += "\n\x02 [" + str(row["nVotes"]-1) + "]\x02\t" + str(row["list_order"]) + ". " + row["description"]
+        elif len(results) is 1:
+          response += "\n\x02 [" + str(results[0]["nVotes"]-1) + "]\x02\t" + str(results[0]["list_order"]) + ". " + results[0]["description"]
       else:
         response = "Poll not found :("
 

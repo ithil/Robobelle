@@ -26,19 +26,18 @@ class Help(BaseModule):
         help = sorted(help, key=lambda command: command[0])
 
         count = 0
-        msg.notice("I know the following commands: ")
+        msg.reply_handle.msg(msg.author, "I know the following commands: ")
         for h in help:
           if h[0] in ExampleModule.matchers.keys():
             continue
           # Remove regex notation (\s*+, \w*+, \b+*)
           cmd = re.sub(r'((\\w\**\+*)|(\\s\+*\**)|\^|\\b\**\+*)', '', h[0])
-          cmd = re.sub(r'(\\d)','<number>', cmd)
+          cmd = re.sub(r'(\\d)',' <number>', cmd)
           print("\t" + cmd + "\t-\t" + h[1].strip())
           count += 1
 
-          # Avoid flood limit
-          if count == 9:
-            sleep(4)
-          msg.reply("\t" + cmd + "\t-\t" + h[1].strip())
+          # Avoid flood limit by sending PM .. hopefully
+          msg.reply_handle.msg(msg.author,"\t" + cmd + "\t-\t" + h[1].strip())
+        msg.reply("I've sent my resume your way, {}. Check your PM!".format(msg.author))
 
         #msg.notice(help_message)
