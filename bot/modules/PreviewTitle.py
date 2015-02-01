@@ -27,8 +27,8 @@ class PreviewTitle(BaseModule):
       subreddit = self.r.get_subreddit(msg.clean_contents.strip())
       if subreddit:
         for submission in subreddit.get_new(limit=5):
-          msg.reply("[{score}] {title} ({url})".format(score=submission.score, title=submission.title, url=submission.permalink).encode("utf-8"))
-      return None;
+          msg.reply("[{score}] {title} ({url})".format(score=submission.score, title=submission.title, url=submission.short_link).encode("utf-8"))
+      return None
 
     def sub_hot(self, msg):
       """
@@ -37,8 +37,8 @@ class PreviewTitle(BaseModule):
       subreddit = self.r.get_subreddit(msg.clean_contents.strip())
       if subreddit:
         for submission in subreddit.get_hot(limit=5):
-          msg.reply("[{score}] {title} ({url})".format(score=submission.score, title=submission.title, url=submission.permalink))
-      return None;
+          msg.reply("[{score}] {title} ({url})".format(score=submission.score, title=submission.title, url=submission.short_link))
+      return None
 
     def sub_top(self, msg):
       """
@@ -47,8 +47,19 @@ class PreviewTitle(BaseModule):
       subreddit = self.r.get_subreddit(msg.clean_contents.strip())
       if subreddit:
         for submission in subreddit.get_top(limit=5):
-          msg.reply("[{score}] {title} ({url})".format(score=submission.score, title=submission.title, url=submission.permalink))
-      return None;
+          msg.reply("[{score}] {title} ({url})".format(score=submission.score, title=submission.title, url=submission.short_link))
+      return None
+
+    def get_reddit_preview(url):
+      submission = self.r.get_submission(url)
+      html = markdown(submission.selftext)
+      text = ''.join(BeautifulSoup(html).findAll(text=True))
+      amount_lines = 2
+
+      summary = text.split('\n').pop(0)
+      summary = (summary[:amount_lines*348] + '...') if len(summary) > 348 else summary
+      return summary
+
 
     def raw(self, msg):
         """ If msg contains a URL, fetch the title and return it as a fancy string """
@@ -58,6 +69,8 @@ class PreviewTitle(BaseModule):
           soup = BeautifulSoup(urllib.urlopen(urls[0]))
           print("Scanned for URLs. Match: {}".format(urls[0]))
           msg.reply("\x02Title: \x02" + soup.title.string.encode('utf-8'))
+          if re.match('http[s]?://[w]{0,3}\.?reddit\.com/\w+/.*', urls[0]) is not None:
+            msg.reply(self.get_reddit_preview(urls[0]))
           return
         return None
         print("Scanned for URLs. No match.")
