@@ -110,10 +110,10 @@ class RoboBelle(irc.IRCClient):
         # or learning from messages.
       else:
         # If any module has a method "raw", it will be run on ANY message
-        # and replies can be sent via reply_handler (self)
+        # TODO: This should be moved into Message.dispatch()
         for module in self.factory.loader.modules["raw"]:
           if hasattr(module["module"], 'raw'):
             print("Module {} registered for 'raw' message processing ".format(module["module"].__class__.__name__))
-            getattr(module["module"],'raw')(msg, channel, self)
+            getattr(module["module"],'raw')(Message(msg, sender, channel, self))
           else:
             print("Could not find method 'raw' in module "+module["module"].__class__.__name__)

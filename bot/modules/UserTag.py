@@ -31,7 +31,7 @@ class UserTag(BaseModule):
 
       contents = cursor.fetchone()
       if contents:
-        msg.reply("\x02{tag}\x02: {content}".format(tag=tag, content=contents["contents"]))
+        msg.reply("\x02{tag}\x02: {content}".format(tag=tag.encode('utf-8'), content=contents["contents"].encode('utf-8')))
       else:
         msg.reply("I don't think that tag is set, {sender}".format(sender=msg.author))
 

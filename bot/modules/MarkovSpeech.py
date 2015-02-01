@@ -91,10 +91,10 @@ class MarkovSpeech(BaseModule):
         cursor.execute("UPDATE sequence SET occurance=occurance+1 WHERE first=(SELECT id FROM word WHERE word=? LIMIT 1) AND second=(SELECT id FROM word WHERE word=? LIMIT 1) AND first_word=?", (first,second,first_pair))
       self.db.commit()
 
-    def raw(self, msg, sender, reply_handle):
+    def raw(self, msg):
         """ Process messages and learn """
         cursor = self.db.cursor()
-        words = [(single,) for single in msg.split()]
+        words = [(single,) for single in msg.contents.split()]
         # Add the words if it doesnt exist
         cursor.executemany("INSERT OR IGNORE INTO word (word) VALUES (?)",words)
 

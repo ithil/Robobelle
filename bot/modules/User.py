@@ -1,4 +1,6 @@
+from __future__ import division
 from datetime import datetime
+
 import sqlite3 as sql
 import re
 
@@ -8,7 +10,7 @@ from BaseModule import BaseModule
 
 class User(BaseModule):
 
-    matchers = {"!seen": "last_seen", "!greet": "force_greet_user", "!addgreeting": "add_greeting", "!dropgreeting": "remove_greeting"}
+    matchers = {"!seen": "last_seen", "!greet": "force_greet_user", "!addgreeting": "add_greeting", "!dropgreeting": "remove_greeting", "!stats": "get_statistics"}
     events = { "joined": "update_last_seen_and_greet", "parted": "update_last_seen_and_greet" }
     db = sql.connect('bot/modules/databases/user')
     db.row_factory = sql.Row
@@ -137,6 +139,38 @@ class User(BaseModule):
         print(event.contents)
       return None
 
+    def get_statistics(self, msg):
+      cursor = self.db.cursor()
+      results = cursor.execute("SELECT user, lines, words FROM statistics WHERE channel = ? ORDER BY words DESC LIMIT 5", (msg.channel,))
+      results = cursor.fetchall()
+
+      response = "\x02Statistics for {channel}\x02".format(channel=msg.channel)
+      count = 0
+      for row in results:
+        count += 1
+        wpl = row["words"] / row["lines"]
+        response += "\n\x02{rank}.\x02 {user} with {words} words over {lines} lines (average {wpl} words/line)".format(rank=count,user=row["user"], words=row["words"], lines=row["lines"], wpl=wpl)
+      msg.reply(response)
+
+
+    def update_statistics(self, msg):
+      cursor = self.db.cursor()
+      words = msg.contents.split()
+
+      cursor.execute("SELECT count(*) FROM statistics WHERE user = ? and channel = ?",(msg.author,msg.channel))
+
+      results = cursor.fetchone()[0]
+      if results == 0  :
+        print("No results found, adding {u} of {c} to statistics".format(u=msg.author,c=msg.channel))
+        cursor.execute("INSERT INTO statistics (user, lines, words, channel) VALUES (?,?,?,?)", (msg.author, 1, len(words), msg.channel))
+      else:
+        print("Results found, attempting update of {u} from {c} to statistics".format(u=msg.author,c=msg.channel))
+        cursor.execute("UPDATE statistics SET lines=lines+1, words=words+? WHERE user = ? and channel = ?", (len(words), msg.author, msg.channel))
+      self.db.commit()
+
+    def raw(self, msg):
+      self.update_statistics(msg)
+
     def how_long_ago(self, date):
       """
       Turn a past date into how long ago it was, i.e 2 hours ago, 1 hour ago, yesterday.
@@ -185,4 +219,5 @@ class User(BaseModule):
       cursor = self.db.cursor()
       cursor.execute('CREATE TABLE IF NOT EXISTS "user" ("user" TEXT PRIMARY KEY NOT NULL, "first_seen" INTEGER NOT NULL DEFAULT (date("now", "localtime")), "timestamp" INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP);')
       cursor.execute('CREATE TABLE IF NOT EXISTS "greeting" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "user" TEXT NOT NULL, "message" TEXT NOT NULL, "channel" TEXT NOT NULL);')
+      cursor.execute('CREATE TABLE IF NOT EXISTS "statistics" ("id" INTEGER PRIMARY KEY, "user" VARCHAR(15), "lines" INTEGER DEFAULT 1, "words" INTEGER DEFAULT 0, "channel" TEXT NOT NULL)')
       self.db.commit()

@@ -25,6 +25,6 @@ class ExampleModule(BaseModule):
       """This function will be run when the 'joined' event hook is triggered"""
       return None
 
-    def raw(self, msg, sender, reply_handle):
+    def raw(self, msg):
         """ Function that will always be run, on any message. No reply can be sent"""
         print("Received message {}".format(msg))

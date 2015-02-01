@@ -50,14 +50,14 @@ class PreviewTitle(BaseModule):
           msg.reply("[{score}] {title} ({url})".format(score=submission.score, title=submission.title, url=submission.permalink))
       return None;
 
-    def raw(self, msg, channel, reply_handle):
+    def raw(self, msg):
         """ If msg contains a URL, fetch the title and return it as a fancy string """
-        print("Scanning {}".format(msg))
-        urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
+        print("Scanning {}".format(msg.contents))
+        urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg.contents)
         if len(urls):
           soup = BeautifulSoup(urllib.urlopen(urls[0]))
           print("Scanned for URLs. Match: {}".format(urls[0]))
-          reply_handle.msg(channel, "\x02Title: \x02" + soup.title.string.encode('utf-8'))
+          msg.reply("\x02Title: \x02" + soup.title.string.encode('utf-8'))
           return
         return None
         print("Scanned for URLs. No match.")
