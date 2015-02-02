@@ -27,7 +27,12 @@ class MarkovSpeech(BaseModule):
         i = 0
         sentence = msg.clean_contents.strip().split()
         print(sentence)
-        while len(sentence)<350 and (len(sentence)>150 and random.randint(1,12)<4):
+        while len(sentence)<350:
+
+          # This is not pythonic but I had a brainfreeze about boolean operations
+          if (len(sentence)>150 and random.randint(1,12)<4):
+            break
+
           if i == 0 and not len(sentence):
             word = self.get_word(None,1)
           elif(i == 0) and len(sentence) > 0:
