@@ -30,7 +30,7 @@ class MarkovSpeech(BaseModule):
         while len(sentence)<350:
 
           # This is not pythonic but I had a brainfreeze about boolean operations
-          if (len(sentence)>150 and random.randint(1,12)<4):
+          if (len(sentence)>150 and random.randint(1,12)<5):
             break
 
           if i == 0 and not len(sentence):
