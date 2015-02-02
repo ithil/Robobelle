@@ -118,7 +118,7 @@ class User(BaseModule):
     ##
     def last_seen(self,message):
       """
-      Updates timestamp for when a user last joined or parted a channel
+      Checks when a user was last seen
       """
       cursor = self.db.cursor()
 
@@ -147,6 +147,7 @@ class User(BaseModule):
       return None
 
     def get_statistics(self, msg):
+      """ Who talks the most in here? And how efficiently? See the top 5 (or give a number like !stats 10 for top whatever!) """
       cursor = self.db.cursor()
 
       limit = re.search(r'(\d+)',msg.contents)

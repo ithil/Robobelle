@@ -6,8 +6,10 @@ from time import sleep
 
 class Help(BaseModule):
 
-    matchers = {"!help": "help_message"}
+    matchers = {"!help": "help_message", "!more": "more_help", "!command": "help_command"}
     event = {"join": "say_hi"}
+    help = []
+    help_msg = []
 
     def __init__(self, args):
         """
@@ -17,27 +19,41 @@ class Help(BaseModule):
           the provided function name
         """
         super(self.__class__,self).__init__(self)
+        self.create_help_message()
 
     def help_message(self,msg):
+      """ Prints a help message for all commands """
+      for line in self.help_msg[:len(self.help_msg)/2]:
+        msg.notice(line)
+      msg.reply("I've sent my resume your way, {}. For more commands, type !more".format(msg.author))
+
+    def more_help(self,msg):
+      """ Prints the second help page """
+      for line in self.help_msg[len(self.help_msg)/2:]:
+        msg.notice(line)
+
+    def help_command(self,msg):
+      """ Prints help for a specific command """
+      find_help = [cmdhelp for index, cmdhelp in enumerate(self.help) if cmdhelp[0] == msg.clean_contents.strip()]
+      if len(find_help):
+        msg.reply(find_help[0][0]+": "+find_help[0][1])
+      else:
+        msg.reply("Well, that's a trick I don't know ... please don't hate me :(")
+
+
+    def create_help_message(self):
         """
         Prints a help message generated from docstrings from loaded modules
         """
-        help = [(mod["regex"], mod["description"]) for mod in ModuleLoader.modules["regex"]]
-        help = sorted(help, key=lambda command: command[0])
+        self.help = [(re.sub(r'((\\w\**\+*)|(\\s\+*\**)|\^|\\b\**\+*)', '', mod["regex"]), mod["description"].strip('\n')) for mod in ModuleLoader.modules["regex"] ]
+        print(self.help)
+        self.help = sorted(self.help, key=lambda command: command[0])
 
         count = 0
-        msg.reply_handle.msg(msg.author, "I know the following commands: ")
-        for h in help:
+
+        for i,h in enumerate(self.help):
           if h[0] in ExampleModule.matchers.keys():
             continue
           # Remove regex notation (\s*+, \w*+, \b+*)
-          cmd = re.sub(r'((\\w\**\+*)|(\\s\+*\**)|\^|\\b\**\+*)', '', h[0])
-          cmd = re.sub(r'(\\d)',' <number>', cmd)
-          print("\t" + cmd + "\t-\t" + h[1].strip())
-          count += 1
-
-          # Avoid flood limit by sending PM .. hopefully
-          msg.reply_handle.msg(msg.author,"\t" + cmd + "\t-\t" + h[1].strip())
-        msg.reply("I've sent my resume your way, {}. Check your PM!".format(msg.author))
-
-        #msg.notice(help_message)
+          if h[0] and h[1]:
+            self.help_msg.append("\t" + h[0] + "\t-\t" + h[1].strip())
