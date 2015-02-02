@@ -40,7 +40,7 @@ class User(BaseModule):
       greeting = self.get_greeting(event.author, event.channel)
       if self.first_seen(event.author) or not greeting:
         greeting = self.get_greeting('new', event.channel)
-        greeting = re.sub("new", user, greeting)
+        greeting = re.sub("new", event.author, greeting)
         event.reply(greeting)
       elif greeting:
         event.reply(greeting)
