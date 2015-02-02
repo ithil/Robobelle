@@ -39,7 +39,9 @@ class User(BaseModule):
     def greet_user(self, event):
       greeting = self.get_greeting(event.author, event.channel)
       if self.first_seen(event.author) or not greeting:
-        event.reply(self.get_greeting('new', event.channel))
+        greeting = self.get_greeting('new', event.channel)
+        greeting = re.sub("new", user, greeting)
+        event.reply(greeting)
       elif greeting:
         event.reply(greeting)
       else:
@@ -55,9 +57,8 @@ class User(BaseModule):
       if user_greeting:
         message = "[\x02" + str(user_greeting["id"]) + "]\x02 " + user_greeting["message"].encode('utf-8')
         message = re.sub("USER", user, message)
+        message = re.sub("''", "'", message)
 
-        if user is "new":
-          message = re.sub("new", user, message)
         return message
       else:
         return None
@@ -164,7 +165,7 @@ class User(BaseModule):
       for row in results:
         count += 1
         wpl = row["words"] / row["lines"]
-        response += "\n\x02{rank}.\x02 {user} with {words} words over {lines} lines (average {wpl} words/line)".format(rank=count,user=row["user"], words=row["words"], lines=row["lines"], wpl=wpl)
+        response += "\n\x02{rank}.\x02 {user} with {words} words over {lines} lines (average {wpl} words/line)".format(rank=count,user=row["user"], words=row["words"], lines=row["lines"], wpl="{0:.2f}".format(wpl))
       msg.reply(response)
 
 
