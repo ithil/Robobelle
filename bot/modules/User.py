@@ -30,7 +30,9 @@ class User(BaseModule):
       """ Force me to say hi to someone """
       greeting = self.get_greeting(msg.clean_contents, msg.channel)
       if not greeting:
-        msg.reply(self.get_greeting('new', msg.channel))
+        greeting = self.get_greeting('new', msg.channel)
+        message = re.sub("new", msg.clean_contents, greeting)
+        msg.reply(greeting)
       else:
         msg.reply(greeting)
 
