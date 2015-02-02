@@ -28,16 +28,18 @@ class User(BaseModule):
 
     def force_greet_user(self, msg):
       """ Force me to say hi to someone """
-      if self.first_seen(msg.clean_contents):
+      greeting = self.get_greeting(msg.clean_contents, msg.channel)
+      if not greeting:
         msg.reply(self.get_greeting('new', msg.channel))
       else:
-        greeting = self.get_greeting(msg.clean_contents, msg.channel)
-        if greeting:
-          msg.reply(greeting)
+        msg.reply(greeting)
 
     def greet_user(self, event):
-      if self.first_seen(event.author):
+      greeting = self.get_greeting(event.author, event.channel)
+      if self.first_seen(event.author) or not greeting:
         event.reply(self.get_greeting('new', event.channel))
+      elif greeting:
+        event.reply(greeting)
       else:
         greeting = self.get_greeting(event.author, event.channel)
         if greeting:
@@ -51,6 +53,9 @@ class User(BaseModule):
       if user_greeting:
         message = user_greeting["message"].encode('utf-8')
         message = re.sub("USER", user, message)
+
+        if user is "new":
+          message = re.sub("new", user, message)
         return message
       else:
         return None
