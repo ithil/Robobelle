@@ -53,7 +53,7 @@ class User(BaseModule):
       cursor.execute('SELECT id, message FROM greeting WHERE user = ? AND channel = ? ORDER BY RANDOM() LIMIT 1',(user,channel))
       user_greeting = cursor.fetchone()
       if user_greeting:
-        message = "\x02" + str(user_greeting["id"]) + "\x02" + user_greeting["message"].encode('utf-8')
+        message = "[\x02" + str(user_greeting["id"]) + "]\x02 " + user_greeting["message"].encode('utf-8')
         message = re.sub("USER", user, message)
 
         if user is "new":
@@ -140,7 +140,7 @@ class User(BaseModule):
       cursor = self.db.cursor()
       cursor.execute("INSERT OR REPLACE INTO user (user, first_seen, timestamp) VALUES(?, coalesce((SELECT first_seen FROM user WHERE user = ? AND first_seen IS NOT NULL),CURRENT_TIMESTAMP), CURRENT_TIMESTAMP)", (event.author.lower(),event.author.lower()))
       self.db.commit()
-      if event.contents == "joined":
+      if event.event == "joined":
         self.greet_user(event)
       else:
         print(event.contents)
@@ -148,7 +148,14 @@ class User(BaseModule):
 
     def get_statistics(self, msg):
       cursor = self.db.cursor()
-      results = cursor.execute("SELECT user, lines, words FROM statistics WHERE channel = ? ORDER BY words DESC LIMIT 5", (msg.channel,))
+
+      limit = re.search(r'(\d+)',msg.contents)
+
+      if limit:
+        limit = limit.group(1)
+        results = cursor.execute("SELECT user, lines, words FROM statistics WHERE channel = ? ORDER BY words DESC LIMIT ?", (msg.channel,limit))
+      else:
+        results = cursor.execute("SELECT user, lines, words FROM statistics WHERE channel = ? ORDER BY words DESC LIMIT 5", (msg.channel,))
       results = cursor.fetchall()
 
       response = "\x02Statistics for {channel}\x02".format(channel=msg.channel)
