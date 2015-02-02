@@ -50,10 +50,10 @@ class User(BaseModule):
     def get_greeting(self, user, channel):
       """ Retrieves greeting for a user """
       cursor = self.db.cursor()
-      cursor.execute('SELECT message FROM greeting WHERE user = ? AND channel = ? ORDER BY RANDOM() LIMIT 1',(user,channel))
+      cursor.execute('SELECT id, message FROM greeting WHERE user = ? AND channel = ? ORDER BY RANDOM() LIMIT 1',(user,channel))
       user_greeting = cursor.fetchone()
       if user_greeting:
-        message = user_greeting["message"].encode('utf-8')
+        message = "\x02" + str(user_greeting["id"]) + "\x02" + user_greeting["message"].encode('utf-8')
         message = re.sub("USER", user, message)
 
         if user is "new":
