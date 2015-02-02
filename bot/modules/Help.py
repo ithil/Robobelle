@@ -24,13 +24,13 @@ class Help(BaseModule):
     def help_message(self,msg):
       """ Prints a help message for all commands """
       for line in self.help_msg[:len(self.help_msg)/2]:
-        msg.notice(line)
+        msg.reply_handle.notice(msg.author,line)
       msg.reply("I've sent my resume your way, {}. For more commands, type !more".format(msg.author))
 
     def more_help(self,msg):
       """ Prints the second help page """
       for line in self.help_msg[len(self.help_msg)/2:]:
-        msg.notice(line)
+        msg.reply_handle.notice(msg.author,line)
 
     def help_command(self,msg):
       """ Prints help for a specific command """

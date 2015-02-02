@@ -24,18 +24,20 @@ class Trigger(object):
 
         message --  String to reply with
         """
-        if self.channel == self.author:
+        if self.channel == self.reply_handle.factory.nick:
             self.reply_handle.msg(self.author, message)
+            log.msg("Sending reply to {channel} since author was {author}".format(channel=self.channel,author=self.author))
             log.msg("Sending reply to {}".format(self.author))
         else:
             self.reply_handle.msg(self.channel, message)
+            log.msg("Sending reply to {channel} because author was {author}".format(channel=self.channel,author=self.author))
             log.msg("Sending reply to {}".format(self.channel))
 
     def notice(self, message):
       """
       Sends a reply via NOTICE
       """
-      if self.channel == self.author:
+      if self.channel == self.reply_handle.factory.nick:
           self.reply_handle.notice(self.author, message)
           log.msg("Sending reply to {}".format(self.author))
       else:
