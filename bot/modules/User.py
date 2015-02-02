@@ -38,16 +38,12 @@ class User(BaseModule):
 
     def greet_user(self, event):
       greeting = self.get_greeting(event.author, event.channel)
-      if self.first_seen(event.author) or not greeting:
+      if self.first_seen(event.author):
         greeting = self.get_greeting('new', event.channel)
         greeting = re.sub("new", event.author, greeting)
         event.reply(greeting)
       elif greeting:
         event.reply(greeting)
-      else:
-        greeting = self.get_greeting(event.author, event.channel)
-        if greeting:
-          event.reply(greeting)
 
     def get_greeting(self, user, channel):
       """ Retrieves greeting for a user """
@@ -55,7 +51,7 @@ class User(BaseModule):
       cursor.execute('SELECT id, message FROM greeting WHERE user = ? AND channel = ? ORDER BY RANDOM() LIMIT 1',(user,channel))
       user_greeting = cursor.fetchone()
       if user_greeting:
-        message = "[\x02" + str(user_greeting["id"]) + "]\x02 " + user_greeting["message"].encode('utf-8')
+        message = "\x02[" + str(user_greeting["id"]) + "]\x02 " + user_greeting["message"].encode('utf-8').strip("'")
         message = re.sub("USER", user, message)
         message = re.sub("''", "'", message)
 
