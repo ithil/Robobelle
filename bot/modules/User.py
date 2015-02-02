@@ -120,11 +120,10 @@ class User(BaseModule):
       cursor = self.db.cursor()
 
       cursor.execute("SELECT * FROM user WHERE user = ?",(message.clean_contents.lower(),))
-      print("Query: "+"SELECT * FROM user WHERE user = "+message.clean_contents.lower())
       cursor.execute("SELECT * FROM user WHERE user = ?",(message.clean_contents.lower(),))
       results = cursor.fetchone()
       if results:
-        message.reply("{user} was last seen {time}".format(user=results["user"],time=self.how_long_ago(results["timestamp"])))
+        message.reply("{user} was last seen {time}".format(user=results["user"],time=self.how_long_ago(results["timestamp"])).capitalize())
       else:
         print(results)
       return message
@@ -212,7 +211,7 @@ class User(BaseModule):
         elif difference.seconds < 120:
           return "a minute ago"
         elif difference.seconds < 3600:
-          return str(difference.seconds/60) + " minutes ago"
+          return "{0:.2f}".format(difference.seconds/60) + " minutes ago"
         elif difference.seconds < 7200:
           return "an hour or so ago"
         elif difference.seconds < 86400:
