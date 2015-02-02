@@ -4,4 +4,5 @@
 !*.ini
 !*.md
 !requirements
+bot/modules/databases/*
 !**/
