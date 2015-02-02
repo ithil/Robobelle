@@ -32,7 +32,7 @@ class User(BaseModule):
       if not greeting:
         greeting = self.get_greeting('new', msg.channel)
         message = re.sub("new", msg.clean_contents, greeting)
-        msg.reply(greeting)
+        msg.reply(message)
       else:
         msg.reply(greeting)
 
