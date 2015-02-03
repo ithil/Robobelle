@@ -93,7 +93,7 @@ class User(BaseModule):
 
       cursor = self.db.cursor()
       cursor.execute("DELETE FROM greeting WHERE id=?",(greeting_id,))
-      if cursor.commit():
+      if self.db.commit():
         msg.reply("Okay, okay, fine! I get it ... I won't say that again, alright?")
 
     def first_seen(self, user):
