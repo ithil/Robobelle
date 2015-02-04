@@ -8,3 +8,4 @@ nltk
 BeautifulSoup
 praw
 markdown
+PyGithub
