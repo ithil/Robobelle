@@ -18,8 +18,7 @@ class GithubManagement(BaseModule):
 
     def request_feature(self,msg):
         """
-        Function that will be run when command !match_this is provided.
-        This docstring becomes the help message when !help is run.
+        Request a feature by opening a Github issue. Arguments are: title message
         """
         r = self.github.get_user("amnesthesia").get_repos("Robobelle")
         l = [repo for repo in r if repo.name == "Robobelle"].pop()
