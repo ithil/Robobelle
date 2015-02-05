@@ -1,12 +1,20 @@
-from BaseModule import BaseModule
-import sqlite3 as sql
 import random
+import urllib
+from datetime import datetime
+from bs4 import BeautifulSoup
+import sqlite3 as sql
+
+
+from BaseModule import BaseModule
 
 class MarkovSpeech(BaseModule):
 
-    matchers = {"^!speak": "generate_sentence"}
+    matchers = {"^!speak": "generate_sentence", "!topic": "force_random_topic"}
+    events = {"joined": "random_topic", "parted": "random_topic", "nick": "random_topic", "action": "random_topic", "mode": "random_topic"}
     db = sql.connect('bot/modules/databases/markovspeechnew')
     db.row_factory = sql.Row
+
+    last_message_time = datetime.now()
 
     def __init__(self, args):
         """
@@ -18,6 +26,30 @@ class MarkovSpeech(BaseModule):
         super(self.__class__,self).__init__(self)
         self.initialize_database()
 
+
+    def random_topic(self, msg):
+      """
+      I'll come up with a random topic to get the conversation going
+      """
+      prefixes = ["I've been wondering ...",
+                  "So I was thinking, ",
+                  "Don't ask me why I came to think of it but ...",
+                  "So ...", "Uhm, guys? ",
+                  "HEY, GUYS! I GOT A QUESTION FOR YOU, KINDA ...",
+                  "Yeah, right, so ... ",
+                  "Such lively mood in here... anyways, ",
+                  "ok so, ",
+                  "ok so I've been doing some thinking and ..."
+                  ]
+      if self.last_message_time.seconds > (7*60):
+        self.last_message_time = datetime.now()
+        msg.reply(random.choice(prefixes)+BeautifulSoup(urllib.urlopen("http://conversationstarters.com/generator.php")).find("div", { 'id': 'random'}).text.encode('utf-8'))
+
+    def force_random_topic(self, msg):
+      """
+      I'll come up with a random topic to get the conversation going
+      """
+      msg.reply(BeautifulSoup(urllib.urlopen("http://conversationstarters.com/generator.php")).find("div", { 'id': 'random'}).text.encode('utf-8'))
 
     def generate_sentence(self,msg):
         """
@@ -98,6 +130,7 @@ class MarkovSpeech(BaseModule):
 
     def raw(self, msg):
         """ Process messages and learn """
+        self.last_message_time = datetime.now()
         cursor = self.db.cursor()
         words = [(single,) for single in msg.contents.split()]
         # Add the words if it doesnt exist

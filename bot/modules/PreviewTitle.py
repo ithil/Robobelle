@@ -8,7 +8,7 @@ import praw
 
 class PreviewTitle(BaseModule):
 
-    matchers = {"!sub": "sub_new", "!hot": "sub_hot", "!top": "sub_top"}
+    matchers = {"!sub": "sub_new", "!hot": "sub_hot", "!top\s+.": "sub_top"}
     r = praw.Reddit(user_agent = "Mirabelle")
 
     def __init__(self, args):
