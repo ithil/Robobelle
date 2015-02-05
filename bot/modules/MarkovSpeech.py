@@ -41,7 +41,7 @@ class MarkovSpeech(BaseModule):
                   "ok so, ",
                   "ok so I've been doing some thinking and ..."
                   ]
-      if self.last_message_time.seconds > (7*60):
+      if (datetime.now() - self.last_message_time).seconds > (7*60):
         self.last_message_time = datetime.now()
         msg.reply(random.choice(prefixes)+BeautifulSoup(urllib.urlopen("http://conversationstarters.com/generator.php")).find("div", { 'id': 'random'}).text.encode('utf-8'))
 
