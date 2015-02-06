@@ -228,7 +228,7 @@ class User(BaseModule):
 
     def initialize_database(self):
       cursor = self.db.cursor()
-      cursor.execute('CREATE TABLE IF NOT EXISTS "user" ("user" TEXT PRIMARY KEY NOT NULL, "first_seen" INTEGER NOT NULL DEFAULT (date("now", "localtime")), "timestamp" INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP);')
-      cursor.execute('CREATE TABLE IF NOT EXISTS "greeting" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "user" TEXT NOT NULL, "message" TEXT NOT NULL, "channel" TEXT NOT NULL);')
-      cursor.execute('CREATE TABLE IF NOT EXISTS "statistics" ("id" INTEGER PRIMARY KEY, "user" VARCHAR(15), "lines" INTEGER DEFAULT 1, "words" INTEGER DEFAULT 0, "channel" TEXT NOT NULL)')
+      cursor.execute("CREATE TABLE IF NOT EXISTS 'user' ('user' TEXT PRIMARY KEY NOT NULL, 'first_seen' INTEGER NOT NULL DEFAULT (date('now', 'localtime')), 'timestamp' INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP);")
+      cursor.execute("CREATE TABLE IF NOT EXISTS 'greeting' ('id' INTEGER PRIMARY KEY AUTOINCREMENT, 'user' TEXT NOT NULL, 'message' TEXT NOT NULL, 'channel' TEXT NOT NULL);")
+      cursor.execute("CREATE TABLE IF NOT EXISTS 'statistics' ('id' INTEGER PRIMARY KEY, 'user' VARCHAR(15), 'lines' INTEGER DEFAULT 1, 'words' INTEGER DEFAULT 0, 'channel' TEXT NOT NULL)")
       self.db.commit()
